@@ -1,4 +1,11 @@
-import type { AuthResponse, LoginInput, RegisterInput, UserSummary } from '@foliohub/contracts'
+import type {
+  AuthResponse,
+  LoginInput,
+  RegisterInput,
+  RegistrationChallengeResponse,
+  UserSummary,
+  VerifyRegistrationInput,
+} from '@foliohub/contracts'
 import { computed, reactive } from 'vue'
 import { apiRequest } from './api'
 
@@ -29,7 +36,14 @@ export function useAuth() {
   }
 
   const register = async (input: RegisterInput) => {
-    const response = await apiRequest<AuthResponse>('/v1/auth/register', {
+    return apiRequest<RegistrationChallengeResponse>('/v1/auth/register', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    })
+  }
+
+  const verifyRegistration = async (input: VerifyRegistrationInput) => {
+    const response = await apiRequest<AuthResponse>('/v1/auth/register/verify', {
       method: 'POST',
       body: JSON.stringify(input),
     })
@@ -47,7 +61,7 @@ export function useAuth() {
     checkSession,
     login,
     register,
+    verifyRegistration,
     logout,
   }
 }
-

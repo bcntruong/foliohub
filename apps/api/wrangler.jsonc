@@ -5,8 +5,16 @@
   "compatibility_date": "2026-10-03",
   "vars": {
     "APP_ORIGIN": "https://foliohub.pages.dev",
-    "ENVIRONMENT": "production"
+    "ENVIRONMENT": "production",
+    "OTP_FROM_EMAIL": "FolioHub <noreply.foliohub@gmail.com>",
+    "SMTP_USERNAME": "noreply.foliohub@gmail.com"
   },
+  "kv_namespaces": [
+    {
+      "binding": "REGISTRATION_OTP",
+      "id": "00000000000000000000000000000000"
+    }
+  ],
   "d1_databases": [
     {
       "binding": "DB",
@@ -26,8 +34,16 @@
       "name": "foliohub-api-local",
       "vars": {
         "APP_ORIGIN": "http://localhost:5173",
-        "ENVIRONMENT": "local"
+        "ENVIRONMENT": "local",
+        "OTP_FROM_EMAIL": "FolioHub <noreply.foliohub@gmail.com>",
+        "SMTP_USERNAME": "noreply.foliohub@gmail.com"
       },
+      "kv_namespaces": [
+        {
+          "binding": "REGISTRATION_OTP",
+          "id": "00000000000000000000000000000001"
+        }
+      ],
       "d1_databases": [
         {
           "binding": "DB",
@@ -47,8 +63,16 @@
       "name": "foliohub-api-develop",
       "vars": {
         "APP_ORIGIN": "https://develop.foliohub.pages.dev",
-        "ENVIRONMENT": "develop"
+        "ENVIRONMENT": "develop",
+        "OTP_FROM_EMAIL": "FolioHub <noreply.foliohub@gmail.com>",
+        "SMTP_USERNAME": "noreply.foliohub@gmail.com"
       },
+      "kv_namespaces": [
+        {
+          "binding": "REGISTRATION_OTP",
+          "id": "00000000000000000000000000000002"
+        }
+      ],
       "d1_databases": [
         {
           "binding": "DB",

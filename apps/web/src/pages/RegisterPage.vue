@@ -1,27 +1,57 @@
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
+import { onUnmounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuth } from '../composables/auth'
 import { USERNAME_HINT } from '@foliohub/contracts'
 
 const form = reactive({ email: '', username: '', password: '' })
+const otp = ref('')
+const challengeId = ref('')
+const secondsRemaining = ref(0)
 const error = ref('')
 const loading = ref(false)
 const auth = useAuth()
 const router = useRouter()
+let countdownId: ReturnType<typeof setInterval> | undefined
 
-async function submit() {
+function startCountdown(seconds: number) {
+  secondsRemaining.value = seconds
+  clearInterval(countdownId)
+  countdownId = setInterval(() => {
+    secondsRemaining.value = Math.max(0, secondsRemaining.value - 1)
+    if (secondsRemaining.value === 0) clearInterval(countdownId)
+  }, 1_000)
+}
+
+async function requestOtp() {
   error.value = ''
   loading.value = true
   try {
-    await auth.register(form)
-    await router.push('/dashboard')
+    const response = await auth.register(form)
+    challengeId.value = response.challengeId
+    otp.value = ''
+    startCountdown(response.expiresInSeconds)
   } catch (reason) {
-    error.value = reason instanceof Error ? reason.message : 'Không thể tạo tài khoản'
+    error.value = reason instanceof Error ? reason.message : 'Không thể gửi mã OTP'
   } finally {
     loading.value = false
   }
 }
+
+async function verifyOtp() {
+  error.value = ''
+  loading.value = true
+  try {
+    await auth.verifyRegistration({ challengeId: challengeId.value, otp: otp.value })
+    await router.push('/dashboard')
+  } catch (reason) {
+    error.value = reason instanceof Error ? reason.message : 'Không thể xác thực OTP'
+  } finally {
+    loading.value = false
+  }
+}
+
+onUnmounted(() => clearInterval(countdownId))
 </script>
 
 <template>
@@ -35,10 +65,11 @@ async function submit() {
     </div>
     <form
       class="auth-card"
-      @submit.prevent="submit"
+      @submit.prevent="challengeId ? verifyOtp() : requestOtp()"
     >
-      <h2>Tạo tài khoản</h2>
-      <label><span>Email <span
+      <h2>{{ challengeId ? 'Xác thực email' : 'Tạo tài khoản' }}</h2>
+      <template v-if="!challengeId">
+        <label><span>Email <span
           class="required-mark"
           aria-hidden="true"
         >*</span></span><input
@@ -49,9 +80,9 @@ async function submit() {
         spellcheck="false"
         required
       ></label>
-      <div class="form-field">
-        <div class="field-heading">
-          <label for="register-username">Tên tài khoản <span
+        <div class="form-field">
+          <div class="field-heading">
+            <label for="register-username">Tên tài khoản <span
             class="required-mark"
             aria-hidden="true"
           >*</span></label>
@@ -68,8 +99,8 @@ async function submit() {
               role="tooltip"
             >{{ USERNAME_HINT }}</span>
           </span>
-        </div>
-        <input
+          </div>
+          <input
           id="register-username"
           v-model="form.username"
           name="username"
@@ -79,11 +110,11 @@ async function submit() {
           autocomplete="username"
           spellcheck="false"
           required
-        >
-      </div>
-      <div class="form-field">
-        <div class="field-heading">
-          <label for="register-password">Mật khẩu <span
+          >
+        </div>
+        <div class="form-field">
+          <div class="field-heading">
+            <label for="register-password">Mật khẩu <span
             class="required-mark"
             aria-hidden="true"
           >*</span></label>
@@ -100,8 +131,8 @@ async function submit() {
               role="tooltip"
             >Mật khẩu cần từ 8 đến 72 ký tự.</span>
           </span>
-        </div>
-        <input
+          </div>
+          <input
           id="register-password"
           v-model="form.password"
           name="password"
@@ -110,8 +141,35 @@ async function submit() {
           maxlength="72"
           autocomplete="new-password"
           required
+          >
+        </div>
+      </template>
+      <template v-else>
+        <p class="otp-instruction">
+          Nhập mã gồm 6 chữ số vừa được gửi đến <strong>{{ form.email }}</strong>.
+        </p>
+        <label><span>Mã OTP <span
+          class="required-mark"
+          aria-hidden="true"
+        >*</span></span><input
+          v-model="otp"
+          name="otp"
+          type="text"
+          inputmode="numeric"
+          autocomplete="one-time-code"
+          pattern="[0-9]{6}"
+          minlength="6"
+          maxlength="6"
+          required
+          autofocus
+        ></label>
+        <p
+          class="otp-expiry"
+          aria-live="polite"
         >
-      </div>
+          {{ secondsRemaining > 0 ? `Mã hết hạn sau ${secondsRemaining} giây` : 'Mã OTP đã hết hạn' }}
+        </p>
+      </template>
       <p
         v-if="error"
         class="form-error"
@@ -124,7 +182,16 @@ async function submit() {
         type="submit"
         :disabled="loading"
       >
-        {{ loading ? 'Đang tạo…' : 'Tạo tài khoản' }}
+        {{ loading ? 'Đang xử lý…' : challengeId ? 'Xác thực và tạo tài khoản' : 'Gửi mã OTP' }}
+      </button>
+      <button
+        v-if="challengeId"
+        class="text-button"
+        type="button"
+        :disabled="loading || secondsRemaining > 0"
+        @click="requestOtp"
+      >
+        {{ secondsRemaining > 0 ? `Gửi lại sau ${secondsRemaining}s` : 'Gửi lại mã OTP' }}
       </button>
       <p class="form-foot">
         Đã có tài khoản? <RouterLink to="/login">

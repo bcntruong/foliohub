@@ -1,4 +1,4 @@
-import { loginSchema, portfolioDraftSchema, registerSchema, websiteHref } from '@foliohub/contracts'
+import { loginSchema, portfolioDraftSchema, registerSchema, verifyRegistrationSchema, websiteHref } from '@foliohub/contracts'
 import { describe, expect, it } from 'vitest'
 
 describe('public input contracts', () => {
@@ -12,6 +12,14 @@ describe('public input contracts', () => {
     expect(loginSchema.safeParse({ identifier: 'a@example.com', password: 'password1' }).success).toBe(true)
     expect(loginSchema.safeParse({ identifier: 'an_nguyen-01', password: 'password1' }).success).toBe(true)
     expect(loginSchema.safeParse({ identifier: 'Tên có khoảng trắng', password: 'password1' }).success).toBe(false)
+  })
+
+  it('requires a six-digit OTP and a valid registration challenge', () => {
+    const challengeId = '550e8400-e29b-41d4-a716-446655440000'
+
+    expect(verifyRegistrationSchema.safeParse({ challengeId, otp: '123456' }).success).toBe(true)
+    expect(verifyRegistrationSchema.safeParse({ challengeId, otp: '12345' }).success).toBe(false)
+    expect(verifyRegistrationSchema.safeParse({ challengeId: 'invalid', otp: '123456' }).success).toBe(false)
   })
 
   it('adds safe defaults to a minimal portfolio', () => {

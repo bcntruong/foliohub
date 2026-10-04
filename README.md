@@ -38,9 +38,21 @@ npx wrangler d1 create foliohub-develop
 npx wrangler d1 create foliohub-production
 npx wrangler r2 bucket create foliohub-develop-media
 npx wrangler r2 bucket create foliohub-production-media
+npx wrangler kv namespace create foliohub-develop-registration-otp
+npx wrangler kv namespace create foliohub-production-registration-otp
 ```
 
-Cloudflare prints each D1 `database_id`. Replace the matching placeholder IDs in `apps/api/wrangler.jsonc` and commit that configuration. These IDs identify resources; they are not database passwords. Access is controlled by the logged-in Cloudflare account locally and by API credentials in CI.
+Cloudflare prints each D1 `database_id` and KV namespace `id`. Replace the matching placeholder IDs in `apps/api/wrangler.jsonc` and commit that configuration. These IDs identify resources; they are not passwords. Access is controlled by the logged-in Cloudflare account locally and by API credentials in CI.
+
+Registration OTP emails are sent through Gmail SMTP from `noreply.foliohub@gmail.com`. Enable two-step verification for that Google account, create a 16-character App Password, and configure it as a Worker secret:
+
+```bash
+cd apps/api
+npx wrangler secret put SMTP_PASSWORD --env develop
+npx wrangler secret put SMTP_PASSWORD
+```
+
+For local development, copy `apps/api/.dev.vars.example` to `apps/api/.dev.vars`, then replace `SMTP_PASSWORD` with the Google App Password. The `.dev.vars` file is ignored by Git. Never use the normal Google account password or commit the App Password.
 
 Apply migrations to each environment explicitly:
 
@@ -72,7 +84,7 @@ Set the production `APP_ORIGIN` in `apps/api/wrangler.jsonc` to the real Pages o
 
 ## API overview
 
-- `POST /v1/auth/register`, `POST /v1/auth/login`, `POST /v1/auth/logout`
+- `POST /v1/auth/register`, `POST /v1/auth/register/verify`, `POST /v1/auth/login`, `POST /v1/auth/logout`
 - `GET /v1/auth/me`
 - `GET|POST /v1/me/portfolios`
 - `GET|PUT /v1/me/portfolios/:id`

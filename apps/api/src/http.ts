@@ -8,8 +8,11 @@ export const STATUS = {
   forbidden: 403,
   notFound: 404,
   conflict: 409,
+  tooManyRequests: 429,
   payloadTooLarge: 413,
   unsupportedMediaType: 415,
+  badGateway: 502,
+  serviceUnavailable: 503,
 } as const
 
 export class ApiError extends Error {
@@ -43,4 +46,3 @@ export function apiErrorResponse(context: Context<AppEnvironment>, error: unknow
     500,
   )
 }
-

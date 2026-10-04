@@ -21,6 +21,11 @@ export const registerSchema = z.object({
   username: usernameSchema,
 })
 
+export const verifyRegistrationSchema = z.object({
+  challengeId: z.string().uuid('Yêu cầu xác thực không hợp lệ'),
+  otp: z.string().regex(/^\d{6}$/, 'Mã OTP phải gồm 6 chữ số'),
+})
+
 export const loginSchema = z.object({
   identifier: z.union([emailSchema, usernameSchema], {
     error: 'Email hoặc tên tài khoản không hợp lệ',
@@ -29,7 +34,13 @@ export const loginSchema = z.object({
 })
 
 export type RegisterInput = z.infer<typeof registerSchema>
+export type VerifyRegistrationInput = z.infer<typeof verifyRegistrationSchema>
 export type LoginInput = z.infer<typeof loginSchema>
+
+export interface RegistrationChallengeResponse {
+  challengeId: string
+  expiresInSeconds: number
+}
 
 export interface UserSummary {
   id: string

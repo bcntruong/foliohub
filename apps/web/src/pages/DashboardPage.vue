@@ -13,6 +13,7 @@ const showCreate = ref(false)
 const form = reactive({ name: '', slug: '' })
 const auth = useAuth()
 const router = useRouter()
+const webHost = window.location.host
 
 function slugify(value: string) {
   return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
@@ -68,29 +69,44 @@ onMounted(load)
       class="create-panel"
       @submit.prevent="createPortfolio"
     >
-      <div>
+      <div class="create-panel-intro">
         <p class="eyebrow">
           Bản nháp mới
-        </p><h2>Bạn muốn portfolio này nói về điều gì?</h2>
+        </p><h2>Đặt tên cho portfolio của bạn.</h2><p>Tạo một địa chỉ dễ nhớ. Bạn vẫn có thể thay đổi nội dung sau.</p>
       </div>
-      <label>Tên hiển thị<input
-        v-model="form.name"
-        required
-        placeholder="Nguyễn Minh An"
-        @input="form.slug = slugify(form.name)"
-      ></label>
-      <label>Đường dẫn<input
-        v-model="form.slug"
-        required
-        pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
-      ><small>/u/{{ auth.user.value?.username }}/{{ form.slug || 'portfolio' }}</small></label>
-      <button
-        class="button"
-        type="submit"
-        :disabled="saving"
-      >
-        {{ saving ? 'Đang tạo…' : 'Bắt đầu chỉnh sửa' }}
-      </button>
+      <div class="create-panel-fields">
+        <label>Tên hiển thị<input
+          v-model="form.name"
+          name="displayName"
+          autocomplete="off"
+          required
+          placeholder="Nguyễn Minh An"
+          @input="form.slug = slugify(form.name)"
+        ></label>
+        <label>Đường dẫn<input
+          v-model="form.slug"
+          name="slug"
+          autocomplete="off"
+          spellcheck="false"
+          required
+          pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
+          placeholder="nguyen-minh-an"
+        ></label>
+        <p class="portfolio-url">
+          <span>{{ webHost }}/u/{{ auth.user.value?.username }}/</span><strong>{{ form.slug || 'portfolio' }}</strong>
+        </p>
+      </div>
+      <div class="create-panel-action">
+        <button
+          class="button"
+          type="submit"
+          :disabled="saving"
+        >
+          {{ saving ? 'Đang tạo…' : 'Tạo portfolio' }}
+          <span aria-hidden="true">→</span>
+        </button>
+        <small>Bạn sẽ chuyển tới trình chỉnh sửa.</small>
+      </div>
     </form>
 
     <p
@@ -138,4 +154,3 @@ onMounted(load)
     </div>
   </section>
 </template>
-

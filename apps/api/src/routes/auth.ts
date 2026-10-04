@@ -1,6 +1,7 @@
-import { loginSchema, registerSchema, type UserSummary } from '@foliohub/contracts'
+import { loginSchema, registerSchema, verifyRegistrationSchema, type UserSummary } from '@foliohub/contracts'
 import { Hono } from 'hono'
-import { hashPassword, verifyPassword } from '../auth/crypto'
+import { verifyPassword } from '../auth/crypto'
+import { beginRegistration, verifyRegistration } from '../auth/registration'
 import { clearSessionCookie, createSession } from '../auth/session'
 import { ApiError, STATUS, validationError } from '../http'
 import { authMiddleware } from '../middleware/auth'
@@ -18,35 +19,15 @@ authRoutes.post('/register', async (context) => {
   const parsed = registerSchema.safeParse(await context.req.json())
   if (!parsed.success) return context.json(validationError(parsed.error), STATUS.badRequest)
 
-  const existing = await context.env.DB.prepare(
-    'SELECT id FROM users WHERE email = ? OR username = ? LIMIT 1',
-  )
-    .bind(parsed.data.email, parsed.data.username)
-    .first()
-  if (existing) throw new ApiError(STATUS.conflict, 'Email hoặc tên tài khoản đã được sử dụng', 'USER_EXISTS')
+  return context.json(await beginRegistration(context.env, parsed.data), 202)
+})
 
-  const id = crypto.randomUUID()
-  const now = Date.now()
-  const password = await hashPassword(parsed.data.password)
-  await context.env.DB.prepare(
-    `INSERT INTO users
-      (id, email, username, password_hash, password_salt, password_iterations, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-  )
-    .bind(
-      id,
-      parsed.data.email.toLowerCase(),
-      parsed.data.username,
-      password.hash,
-      password.salt,
-      password.iterations,
-      now,
-      now,
-    )
-    .run()
+authRoutes.post('/register/verify', async (context) => {
+  const parsed = verifyRegistrationSchema.safeParse(await context.req.json())
+  if (!parsed.success) return context.json(validationError(parsed.error), STATUS.badRequest)
 
-  const user = { id, email: parsed.data.email.toLowerCase(), username: parsed.data.username }
-  return context.json({ token: await createSession(context, id), user }, 201)
+  const user = await verifyRegistration(context.env, parsed.data)
+  return context.json({ token: await createSession(context, user.id), user }, 201)
 })
 
 authRoutes.post('/login', async (context) => {
