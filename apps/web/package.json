@@ -1,0 +1,26 @@
+{
+  "name": "@foliohub/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vue-tsc --noEmit && vite build",
+    "dev": "vite",
+    "test": "vitest run --passWithNoTests",
+    "typecheck": "vue-tsc --noEmit"
+  },
+  "dependencies": {
+    "@foliohub/contracts": "*",
+    "@fontsource-variable/space-grotesk": "^5.3.0",
+    "@fontsource/be-vietnam-pro": "^5.3.0",
+    "vue": "latest",
+    "vue-router": "latest"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "latest",
+    "jsdom": "latest",
+    "vite": "latest",
+    "vitest": "latest",
+    "vue-tsc": "latest"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "name": "foliohub",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspace @foliohub/contracts && npm run build --workspace @foliohub/api && npm run build --workspace @foliohub/web",
+    "dev": "concurrently -n API,WEB -c yellow,green \"npm run dev --workspace @foliohub/api\" \"npm run dev --workspace @foliohub/web\"",
+    "dev:api": "npm run dev --workspace @foliohub/api",
+    "dev:web": "npm run dev --workspace @foliohub/web",
+    "lint": "eslint .",
+    "test": "npm run test --workspace @foliohub/api && npm run test --workspace @foliohub/web",
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  },
+  "devDependencies": {
+    "@eslint/js": "latest",
+    "concurrently": "latest",
+    "eslint": "latest",
+    "eslint-plugin-vue": "latest",
+    "globals": "latest",
+    "typescript": "latest",
+    "typescript-eslint": "latest"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
