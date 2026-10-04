@@ -1,10 +1,17 @@
-import { portfolioDraftSchema, registerSchema, websiteHref } from '@foliohub/contracts'
+import { loginSchema, portfolioDraftSchema, registerSchema, websiteHref } from '@foliohub/contracts'
 import { describe, expect, it } from 'vitest'
 
 describe('public input contracts', () => {
   it('rejects usernames and slugs that are unsafe in URLs', () => {
     expect(registerSchema.safeParse({ email: 'a@example.com', password: 'password1', username: '../admin' }).success).toBe(false)
+    expect(registerSchema.safeParse({ email: 'a@example.com', password: 'password1', username: 'an_nguyen-01' }).success).toBe(true)
     expect(portfolioDraftSchema.safeParse({ slug: 'My Portfolio', displayName: 'An' }).success).toBe(false)
+  })
+
+  it('accepts either an email or username for login', () => {
+    expect(loginSchema.safeParse({ identifier: 'a@example.com', password: 'password1' }).success).toBe(true)
+    expect(loginSchema.safeParse({ identifier: 'an_nguyen-01', password: 'password1' }).success).toBe(true)
+    expect(loginSchema.safeParse({ identifier: 'Tên có khoảng trắng', password: 'password1' }).success).toBe(false)
   })
 
   it('adds safe defaults to a minimal portfolio', () => {

@@ -2,6 +2,7 @@
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuth } from '../composables/auth'
+import { USERNAME_HINT } from '@foliohub/contracts'
 
 const form = reactive({ email: '', username: '', password: '' })
 const error = ref('')
@@ -37,7 +38,10 @@ async function submit() {
       @submit.prevent="submit"
     >
       <h2>Tạo tài khoản</h2>
-      <label>Email<input
+      <label><span>Email <span
+          class="required-mark"
+          aria-hidden="true"
+        >*</span></span><input
         v-model="form.email"
         name="email"
         type="email"
@@ -45,23 +49,69 @@ async function submit() {
         spellcheck="false"
         required
       ></label>
-      <label>Username<input
-        v-model="form.username"
-        name="username"
-        pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
-        autocomplete="username"
-        spellcheck="false"
-        required
-      ><small>Ví dụ: an-nguyen</small></label>
-      <label>Mật khẩu<input
-        v-model="form.password"
-        name="password"
-        type="password"
-        minlength="8"
-        maxlength="72"
-        autocomplete="new-password"
-        required
-      ><small>Tối thiểu 8 ký tự</small></label>
+      <div class="form-field">
+        <div class="field-heading">
+          <label for="register-username">Tên tài khoản <span
+            class="required-mark"
+            aria-hidden="true"
+          >*</span></label>
+          <span class="field-help">
+            <button
+              type="button"
+              class="field-help-trigger"
+              aria-label="Xem quy tắc đặt tên tài khoản"
+              aria-describedby="username-hint"
+            >i</button>
+            <span
+              id="username-hint"
+              class="field-tooltip"
+              role="tooltip"
+            >{{ USERNAME_HINT }}</span>
+          </span>
+        </div>
+        <input
+          id="register-username"
+          v-model="form.username"
+          name="username"
+          pattern="[a-z0-9_-]{3,30}"
+          minlength="3"
+          maxlength="30"
+          autocomplete="username"
+          spellcheck="false"
+          required
+        >
+      </div>
+      <div class="form-field">
+        <div class="field-heading">
+          <label for="register-password">Mật khẩu <span
+            class="required-mark"
+            aria-hidden="true"
+          >*</span></label>
+          <span class="field-help">
+            <button
+              type="button"
+              class="field-help-trigger"
+              aria-label="Xem yêu cầu mật khẩu"
+              aria-describedby="password-hint"
+            >i</button>
+            <span
+              id="password-hint"
+              class="field-tooltip"
+              role="tooltip"
+            >Mật khẩu cần từ 8 đến 72 ký tự.</span>
+          </span>
+        </div>
+        <input
+          id="register-password"
+          v-model="form.password"
+          name="password"
+          type="password"
+          minlength="8"
+          maxlength="72"
+          autocomplete="new-password"
+          required
+        >
+      </div>
       <p
         v-if="error"
         class="form-error"

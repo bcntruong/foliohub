@@ -23,7 +23,7 @@ authRoutes.post('/register', async (context) => {
   )
     .bind(parsed.data.email, parsed.data.username)
     .first()
-  if (existing) throw new ApiError(STATUS.conflict, 'Email hoặc username đã được sử dụng', 'USER_EXISTS')
+  if (existing) throw new ApiError(STATUS.conflict, 'Email hoặc tên tài khoản đã được sử dụng', 'USER_EXISTS')
 
   const id = crypto.randomUUID()
   const now = Date.now()
@@ -53,17 +53,18 @@ authRoutes.post('/login', async (context) => {
   const parsed = loginSchema.safeParse(await context.req.json())
   if (!parsed.success) return context.json(validationError(parsed.error), STATUS.badRequest)
 
+  const identifier = parsed.data.identifier.toLowerCase()
   const row = await context.env.DB.prepare(
     `SELECT id, email, username, password_hash, password_salt, password_iterations
-     FROM users WHERE email = ? LIMIT 1`,
+     FROM users WHERE email = ? OR username = ? LIMIT 1`,
   )
-    .bind(parsed.data.email.toLowerCase())
+    .bind(identifier, identifier)
     .first<UserAuthRow>()
   const valid = row
     ? await verifyPassword(parsed.data.password, row.password_hash, row.password_salt, row.password_iterations)
     : false
   if (!row || !valid) {
-    throw new ApiError(STATUS.unauthorized, 'Email hoặc mật khẩu không đúng', 'INVALID_CREDENTIALS')
+    throw new ApiError(STATUS.unauthorized, 'Email, tên tài khoản hoặc mật khẩu không đúng', 'INVALID_CREDENTIALS')
   }
 
   const user = { id: row.id, email: row.email, username: row.username }
@@ -79,4 +80,3 @@ authRoutes.post('/logout', async (context) => {
   clearSessionCookie(context)
   return context.body(null, 204)
 })
-
