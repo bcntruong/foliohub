@@ -13,6 +13,8 @@ interface MediaAccessRow {
   visibility: 'private' | 'public'
 }
 
+const AVATAR_OBJECT_PREFIX = 'avatars'
+
 export const mediaRoutes = new Hono<AppEnvironment>()
 
 mediaRoutes.post('/portfolio/:portfolioId/avatar', authMiddleware, async (context) => {
@@ -36,7 +38,7 @@ mediaRoutes.post('/portfolio/:portfolioId/avatar', authMiddleware, async (contex
 
   const id = crypto.randomUUID()
   const extension = image.type.split('/')[1] ?? 'image'
-  const objectKey = `${context.get('user').id}/${portfolioId}/${id}.${extension}`
+  const objectKey = `${AVATAR_OBJECT_PREFIX}/${context.get('user').id}/${portfolioId}/${id}.${extension}`
   await context.env.MEDIA.put(objectKey, image.stream(), { httpMetadata: { contentType: image.type } })
   try {
     await context.env.DB.batch([
@@ -83,4 +85,3 @@ mediaRoutes.get('/:id', async (context) => {
     },
   })
 })
-

@@ -13,12 +13,10 @@
   "dependencies": {
     "@foliohub/contracts": "*",
     "hono": "latest",
-    "nodemailer": "^10.0.14",
     "zod": "latest"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "latest",
-    "@types/nodemailer": "^8.0.2",
     "typescript": "latest",
     "vitest": "latest",
     "wrangler": "latest"

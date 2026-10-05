@@ -1,12 +1,11 @@
 node_modules/
 dist/
 .wrangler/
-.dev.vars
-.env
-.env.local
+.dev.vars*
+.env*
+apps/api/wrangler.production.jsonc
 coverage/
 *.log
 .DS_Store
 .idea/
 .vscode/
-

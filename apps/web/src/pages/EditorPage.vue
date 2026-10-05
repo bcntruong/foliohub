@@ -11,7 +11,7 @@ import LinksEditor from '../components/LinksEditor.vue'
 import AvatarCropEditor from '../components/AvatarCropEditor.vue'
 import PortfolioTemplate from '../components/PortfolioTemplate.vue'
 import RepeatableSection from '../components/RepeatableSection.vue'
-import { apiRequest, mediaUrl } from '../composables/api'
+import { apiRequest } from '../composables/api'
 import { portfolioApi } from '../composables/portfolios'
 
 const route = useRoute()
@@ -336,7 +336,7 @@ onBeforeRouteLeave(async () => {
           <div class="avatar-upload-row">
             <AvatarCropEditor
               v-if="portfolio.avatarUrl"
-              :image-url="mediaUrl(portfolio.avatarUrl) ?? ''"
+              :image-url="portfolio.avatarUrl"
               :display-name="draft.displayName"
               :position-x="draft.avatarPositionX"
               :position-y="draft.avatarPositionY"

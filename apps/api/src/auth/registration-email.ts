@@ -1,19 +1,17 @@
-import { createTransport } from 'nodemailer'
 import { ApiError, STATUS } from '../http'
 import type { Bindings } from '../types'
 
-const SMTP_HOST = 'smtp.gmail.com'
-const SMTP_PORT = 587
-const PLACEHOLDER_EMAIL_SUFFIX = '.example>'
+const BREVO_EMAIL_ENDPOINT = 'https://api.brevo.com/v3/smtp/email'
+const PLACEHOLDER_EMAIL_SUFFIX = '.example'
 
-type EmailEnvironment = Pick<Bindings, 'OTP_FROM_EMAIL' | 'SMTP_PASSWORD' | 'SMTP_USERNAME'>
+type EmailEnvironment = Pick<Bindings, 'BREVO_API_KEY' | 'OTP_FROM_EMAIL' | 'OTP_FROM_NAME'>
 
 function ensureEmailConfiguration(environment: EmailEnvironment) {
   if (
-    !environment.OTP_FROM_EMAIL
+    !environment.BREVO_API_KEY
+    || !environment.OTP_FROM_EMAIL
     || environment.OTP_FROM_EMAIL.endsWith(PLACEHOLDER_EMAIL_SUFFIX)
-    || !environment.SMTP_PASSWORD
-    || !environment.SMTP_USERNAME
+    || !environment.OTP_FROM_NAME
   ) {
     throw new ApiError(
       STATUS.serviceUnavailable,
@@ -29,26 +27,30 @@ export async function sendRegistrationOtp(
   otp: string,
 ) {
   ensureEmailConfiguration(environment)
-  const transporter = createTransport({
-    host: SMTP_HOST,
-    port: SMTP_PORT,
-    secure: false,
-    requireTLS: true,
-    auth: {
-      user: environment.SMTP_USERNAME,
-      pass: environment.SMTP_PASSWORD,
+
+  const response = await fetch(BREVO_EMAIL_ENDPOINT, {
+    method: 'POST',
+    headers: {
+      accept: 'application/json',
+      'api-key': environment.BREVO_API_KEY,
+      'content-type': 'application/json',
     },
+    body: JSON.stringify({
+      sender: {
+        email: environment.OTP_FROM_EMAIL,
+        name: environment.OTP_FROM_NAME,
+      },
+      to: [{ email }],
+      subject: 'Mã xác thực đăng ký FolioHub',
+      htmlContent: `<p>Mã OTP của bạn là:</p><p style="font-size:28px;font-weight:700;letter-spacing:6px">${otp}</p><p>Mã có hiệu lực trong 1 phút.</p>`,
+    }),
   })
 
-  try {
-    await transporter.sendMail({
-      from: environment.OTP_FROM_EMAIL,
-      to: email,
-      subject: 'Mã xác thực đăng ký FolioHub',
-      html: `<p>Mã OTP của bạn là:</p><p style="font-size:28px;font-weight:700;letter-spacing:6px">${otp}</p><p>Mã có hiệu lực trong 1 phút.</p>`,
+  if (!response.ok) {
+    console.error('Brevo rejected OTP email', {
+      responseBody: await response.text(),
+      status: response.status,
     })
-  } catch (error) {
-    console.error('Gmail SMTP rejected OTP email', { error })
     throw new ApiError(STATUS.badGateway, 'Không thể gửi mã OTP, vui lòng thử lại', 'OTP_EMAIL_FAILED')
   }
 }

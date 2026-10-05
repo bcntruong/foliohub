@@ -5,10 +5,10 @@ export interface Bindings {
   MEDIA: R2Bucket
   REGISTRATION_OTP: KVNamespace
   APP_ORIGIN: string
+  BREVO_API_KEY: string
   ENVIRONMENT: 'local' | 'develop' | 'production'
   OTP_FROM_EMAIL: string
-  SMTP_PASSWORD: string
-  SMTP_USERNAME: string
+  OTP_FROM_NAME: string
 }
 
 export interface Variables {

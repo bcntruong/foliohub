@@ -22,7 +22,7 @@ interface PendingRegistration extends UserSummary {
 
 type RegistrationEnvironment = Pick<
   Bindings,
-  'DB' | 'OTP_FROM_EMAIL' | 'REGISTRATION_OTP' | 'SMTP_PASSWORD' | 'SMTP_USERNAME'
+  'BREVO_API_KEY' | 'DB' | 'OTP_FROM_EMAIL' | 'OTP_FROM_NAME' | 'REGISTRATION_OTP'
 >
 type OtpSender = typeof sendRegistrationOtp
 

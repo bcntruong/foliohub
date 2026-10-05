@@ -1,4 +1,4 @@
-const PASSWORD_ITERATIONS = 120_000
+const PASSWORD_ITERATIONS = 100_000
 const SALT_BYTES = 16
 const HASH_BYTES = 32
 
@@ -62,4 +62,3 @@ export async function hashToken(token: string) {
 export function generateToken() {
   return bytesToBase64(crypto.getRandomValues(new Uint8Array(HASH_BYTES)))
 }
-

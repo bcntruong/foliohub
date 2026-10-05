@@ -1,92 +1,68 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "foliohub-api",
-  "main": "src/index.ts",
-  "compatibility_date": "2026-10-03",
-  "vars": {
-    "APP_ORIGIN": "https://foliohub.pages.dev",
-    "ENVIRONMENT": "production",
-    "OTP_FROM_EMAIL": "FolioHub <noreply.foliohub@gmail.com>",
-    "SMTP_USERNAME": "noreply.foliohub@gmail.com"
-  },
-  "kv_namespaces": [
-    {
-      "binding": "REGISTRATION_OTP",
-      "id": "00000000000000000000000000000000"
-    }
-  ],
-  "d1_databases": [
-    {
-      "binding": "DB",
-      "database_name": "foliohub-production",
-      "database_id": "00000000-0000-0000-0000-000000000000",
-      "migrations_dir": "migrations"
-    }
-  ],
-  "r2_buckets": [
-    {
-      "binding": "MEDIA",
-      "bucket_name": "foliohub-production-media"
-    }
-  ],
-  "env": {
-    "local": {
-      "name": "foliohub-api-local",
-      "vars": {
-        "APP_ORIGIN": "http://localhost:5173",
-        "ENVIRONMENT": "local",
-        "OTP_FROM_EMAIL": "FolioHub <noreply.foliohub@gmail.com>",
-        "SMTP_USERNAME": "noreply.foliohub@gmail.com"
-      },
-      "kv_namespaces": [
-        {
-          "binding": "REGISTRATION_OTP",
-          "id": "00000000000000000000000000000001"
-        }
-      ],
-      "d1_databases": [
-        {
-          "binding": "DB",
-          "database_name": "foliohub-local",
-          "database_id": "00000000-0000-0000-0000-000000000001",
-          "migrations_dir": "migrations"
-        }
-      ],
-      "r2_buckets": [
-        {
-          "binding": "MEDIA",
-          "bucket_name": "foliohub-local-media"
-        }
-      ]
-    },
-    "develop": {
-      "name": "foliohub-api-develop",
-      "vars": {
-        "APP_ORIGIN": "https://develop.foliohub.pages.dev",
-        "ENVIRONMENT": "develop",
-        "OTP_FROM_EMAIL": "FolioHub <noreply.foliohub@gmail.com>",
-        "SMTP_USERNAME": "noreply.foliohub@gmail.com"
-      },
-      "kv_namespaces": [
-        {
-          "binding": "REGISTRATION_OTP",
-          "id": "00000000000000000000000000000002"
-        }
-      ],
-      "d1_databases": [
-        {
-          "binding": "DB",
-          "database_name": "foliohub-develop",
-          "database_id": "00000000-0000-0000-0000-000000000002",
-          "migrations_dir": "migrations"
-        }
-      ],
-      "r2_buckets": [
-        {
-          "binding": "MEDIA",
-          "bucket_name": "foliohub-develop-media"
-        }
-      ]
-    }
-  }
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "foliohub-api",
+	"main": "src/index.ts",
+	"compatibility_date": "2026-10-03",
+	"env": {
+		"local": {
+			"name": "foliohub-api-local",
+			"vars": {
+				"APP_ORIGIN": "http://localhost:5173",
+				"ENVIRONMENT": "local",
+				"OTP_FROM_EMAIL": "noreply.foliohub@gmail.com",
+				"OTP_FROM_NAME": "FolioHub"
+			},
+			"secrets": { "required": ["BREVO_API_KEY"] },
+			"kv_namespaces": [
+				{
+					"binding": "REGISTRATION_OTP",
+					"id": "00000000000000000000000000000001"
+				}
+			],
+			"d1_databases": [
+				{
+					"binding": "DB",
+					"database_name": "foliohub-local",
+					"database_id": "00000000-0000-0000-0000-000000000001",
+					"migrations_dir": "migrations"
+				}
+			],
+			"r2_buckets": [
+				{
+					"binding": "MEDIA",
+					"bucket_name": "foliohub-local-media"
+				}
+			]
+		},
+		"develop": {
+			"name": "foliohub-api-develop",
+			"vars": {
+				"APP_ORIGIN": "https://develop.foliohub.pages.dev",
+				"ENVIRONMENT": "develop",
+				"OTP_FROM_EMAIL": "noreply.foliohub@gmail.com",
+				"OTP_FROM_NAME": "FolioHub"
+			},
+			"secrets": { "required": ["BREVO_API_KEY"] },
+			"kv_namespaces": [
+				{
+					"binding": "REGISTRATION_OTP",
+					"id": "00000000000000000000000000000002"
+				}
+			],
+			"d1_databases": [
+				{
+					"binding": "DB",
+					"database_name": "foliohub-develop",
+					"database_id": "00000000-0000-0000-0000-000000000002",
+					"migrations_dir": "migrations"
+				}
+			],
+			"r2_buckets": [
+				{
+					"binding": "MEDIA",
+					"bucket_name": "foliohub-develop-media"
+				}
+			]
+		}
+	}
 }

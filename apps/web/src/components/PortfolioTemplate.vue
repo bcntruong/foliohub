@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { type Portfolio, websiteHref } from '@foliohub/contracts'
 import { computed } from 'vue'
-import { mediaUrl } from '../composables/api'
+import AuthenticatedImage from './AuthenticatedImage.vue'
 
 const props = defineProps<{ portfolio: Portfolio }>()
 
@@ -60,15 +60,15 @@ function strengthLines(strengths: string) {
         v-if="portfolio.avatarUrl"
         class="portfolio-avatar-frame"
       >
-        <img
+        <AuthenticatedImage
           class="portfolio-avatar"
-          :src="mediaUrl(portfolio.avatarUrl) ?? ''"
+          :source="portfolio.avatarUrl"
           :alt="`Ảnh của ${portfolio.displayName}`"
           :style="avatarStyle"
           width="228"
           height="228"
           fetchpriority="high"
-        >
+        />
       </div>
       <div
         v-else

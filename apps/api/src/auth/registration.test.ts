@@ -36,14 +36,14 @@ function createEnvironment() {
     },
   }
   const environment = {
+    BREVO_API_KEY: 'test-api-key',
     DB: database as unknown as D1Database,
-    OTP_FROM_EMAIL: 'FolioHub <noreply@example.com>',
+    OTP_FROM_EMAIL: 'noreply@example.com',
+    OTP_FROM_NAME: 'FolioHub',
     REGISTRATION_OTP: registrationOtp as unknown as KVNamespace,
-    SMTP_PASSWORD: 'test-app-password',
-    SMTP_USERNAME: 'noreply@example.com',
   } satisfies Pick<
     Bindings,
-    'DB' | 'OTP_FROM_EMAIL' | 'REGISTRATION_OTP' | 'SMTP_PASSWORD' | 'SMTP_USERNAME'
+    'BREVO_API_KEY' | 'DB' | 'OTP_FROM_EMAIL' | 'OTP_FROM_NAME' | 'REGISTRATION_OTP'
   >
 
   return { environment, statements, values }

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onUnmounted, reactive, ref } from 'vue'
+import AuthenticatedImage from './AuthenticatedImage.vue'
 
 type DragAxis = 'horizontal' | 'vertical' | 'none'
 
@@ -90,15 +91,15 @@ onUnmounted(stopDrag)
       @pointercancel="stopDrag"
       @keydown="moveWithKeyboard"
     >
-      <img
-        :src="imageUrl"
+      <AuthenticatedImage
+        :source="imageUrl"
         :alt="`Ảnh đại diện hiện tại của ${displayName}`"
         :style="cropStyle"
         width="180"
         height="180"
         draggable="false"
         @load="detectAxis"
-      >
+      />
       <span aria-hidden="true">{{ instruction }}</span>
     </div>
     <div class="avatar-crop-controls">

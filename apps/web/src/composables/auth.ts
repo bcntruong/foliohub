@@ -7,7 +7,7 @@ import type {
   VerifyRegistrationInput,
 } from '@foliohub/contracts'
 import { computed, reactive } from 'vue'
-import { apiRequest } from './api'
+import { apiRequest, setAuthToken } from './api'
 
 const state = reactive<{ user: UserSummary | null; checked: boolean }>({
   user: null,
@@ -22,6 +22,7 @@ export function useAuth() {
       state.user = response.user
     } catch {
       state.user = null
+      setAuthToken(null)
     } finally {
       state.checked = true
     }
@@ -32,6 +33,7 @@ export function useAuth() {
       method: 'POST',
       body: JSON.stringify(input),
     })
+    setAuthToken(response.token)
     state.user = response.user
   }
 
@@ -47,11 +49,13 @@ export function useAuth() {
       method: 'POST',
       body: JSON.stringify(input),
     })
+    setAuthToken(response.token)
     state.user = response.user
   }
 
   const logout = async () => {
     await apiRequest('/v1/auth/logout', { method: 'POST' })
+    setAuthToken(null)
     state.user = null
   }
 

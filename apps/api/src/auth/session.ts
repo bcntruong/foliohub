@@ -13,6 +13,16 @@ interface SessionRow extends UserSummary {
   session_id: string
 }
 
+function sessionCookieOptions(environment: AppEnvironment['Bindings']['ENVIRONMENT']) {
+  const isLocal = environment === 'local'
+  return {
+    httpOnly: true,
+    secure: !isLocal,
+    sameSite: isLocal ? 'Lax' as const : 'None' as const,
+    path: '/',
+  }
+}
+
 export async function createSession(context: Context<AppEnvironment>, userId: string) {
   const token = generateToken()
   const now = Date.now()
@@ -23,17 +33,17 @@ export async function createSession(context: Context<AppEnvironment>, userId: st
     .run()
 
   setCookie(context, SESSION_COOKIE, token, {
-    httpOnly: true,
-    secure: context.env.ENVIRONMENT !== 'local',
-    sameSite: 'Lax',
+    ...sessionCookieOptions(context.env.ENVIRONMENT),
     maxAge: SESSION_SECONDS,
-    path: '/',
   })
   return token
 }
 
 export function clearSessionCookie(context: Context<AppEnvironment>) {
-  setCookie(context, SESSION_COOKIE, '', { httpOnly: true, maxAge: 0, path: '/', sameSite: 'Lax' })
+  setCookie(context, SESSION_COOKIE, '', {
+    ...sessionCookieOptions(context.env.ENVIRONMENT),
+    maxAge: 0,
+  })
 }
 
 function extractToken(context: Context<AppEnvironment>) {
@@ -60,4 +70,3 @@ export async function requireSession(context: Context<AppEnvironment>) {
     user: { id: row.id, email: row.email, username: row.username },
   }
 }
-

@@ -5,6 +5,7 @@ describe('password security', () => {
   it('accepts the original password and rejects a different one', async () => {
     const password = await hashPassword('correct-horse-battery-staple')
 
+    expect(password.iterations).toBeLessThanOrEqual(100_000)
     await expect(
       verifyPassword('correct-horse-battery-staple', password.hash, password.salt, password.iterations),
     ).resolves.toBe(true)
@@ -21,4 +22,3 @@ describe('password security', () => {
     expect(await hashToken(first)).not.toBe(first)
   })
 })
-
