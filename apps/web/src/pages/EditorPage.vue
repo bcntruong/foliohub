@@ -13,6 +13,7 @@ import PortfolioTemplate from '../components/PortfolioTemplate.vue'
 import RepeatableSection from '../components/RepeatableSection.vue'
 import { apiRequest } from '../composables/api'
 import { portfolioApi } from '../composables/portfolios'
+import { AVATAR_COMPRESSION_OPTIONS, compressImage } from '../utils/imageCompression'
 
 const route = useRoute()
 const router = useRouter()
@@ -150,9 +151,10 @@ async function uploadAvatar(event: Event) {
   if (!image || !portfolio.value) return
   uploading.value = true
   error.value = ''
-  const body = new FormData()
-  body.append('image', image)
   try {
+    const compressedImage = await compressImage(image, AVATAR_COMPRESSION_OPTIONS)
+    const body = new FormData()
+    body.append('image', compressedImage)
     const result = await apiRequest<{ media: { url: string } }>(
       `/v1/media/portfolio/${portfolio.value.id}/avatar`, { method: 'POST', body },
     )

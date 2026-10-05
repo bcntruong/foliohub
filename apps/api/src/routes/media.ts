@@ -2,6 +2,7 @@ import { ALLOWED_IMAGE_TYPES, MAX_MEDIA_BYTES } from '@foliohub/contracts'
 import { Hono } from 'hono'
 import { requireSession } from '../auth/session'
 import { ApiError, STATUS } from '../http'
+import { cleanupReplacedAvatar, type AvatarMediaReference } from '../media/avatar'
 import { authMiddleware } from '../middleware/auth'
 import type { AppEnvironment } from '../types'
 
@@ -19,9 +20,13 @@ export const mediaRoutes = new Hono<AppEnvironment>()
 
 mediaRoutes.post('/portfolio/:portfolioId/avatar', authMiddleware, async (context) => {
   const portfolioId = context.req.param('portfolioId')
-  const owned = await context.env.DB.prepare('SELECT id FROM portfolios WHERE id = ? AND user_id = ?')
+  const owned = await context.env.DB.prepare(
+    `SELECT portfolios.avatar_media_id, media.object_key AS avatar_object_key
+     FROM portfolios LEFT JOIN media ON media.id = portfolios.avatar_media_id
+     WHERE portfolios.id = ? AND portfolios.user_id = ?`,
+  )
     .bind(portfolioId, context.get('user').id)
-    .first()
+    .first<AvatarMediaReference>()
   if (!owned) throw new ApiError(STATUS.notFound, 'Không tìm thấy portfolio', 'PORTFOLIO_NOT_FOUND')
 
   const body = await context.req.parseBody()
@@ -57,6 +62,7 @@ mediaRoutes.post('/portfolio/:portfolioId/avatar', authMiddleware, async (contex
     await context.env.MEDIA.delete(objectKey)
     throw error
   }
+  await cleanupReplacedAvatar(context.env, owned)
   return context.json({ media: { id, url: `/v1/media/${id}` } }, 201)
 })
 
